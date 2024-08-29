@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Display multiple native ad slots." />
+  <title>Display Multiple Native Ad Slots</title>
+  <style>
+    /* Ad slot container */
+    .ad-slot {
+      width: 100%; /* Make ad slots take full width */
+      max-width: 728px; /* Limit max width for larger screens */
+      height: auto; /* Adjust height automatically */
+      margin: 0 auto; /* Center the ad slot */
+      display: block; /* Ensure the ad slots are block elements */
+    }
+
+    /* Container for native ad slots */
+    .native-slot {
+      width: 300px;
+      height: 250px;
+      margin: 20px auto; /* Center the native ad slot */
+      border: 1px solid #ccc; /* Optional: Add a border for visibility */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f0f0f0; /* Optional: Add a background color */
+    }
+
+    /* Responsive image */
+    .responsive-img {
+      width: 100%;
+      height: auto;
+      max-width: 728px; /* Ensure image fits within the ad slot's width */
+      margin: 20px auto;
+      display: block;
+    }
+  </style>
+  <script
+    async
+    src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"
+    crossorigin="anonymous"
+  ></script>
+  <script>
+    window.googletag = window.googletag || { cmd: [] };
+
+    googletag.cmd.push(() => {
+      // Define a responsive ad slot for the banner ad
+      googletag
+        .defineSlot("/6355419/Travel/Asia", [[728, 90], [320, 50]], "banner-ad")
+        .addService(googletag.pubads())
+        .setTargeting("color", "red")
+        .setTargeting("position", "atf");
+
+      // Define multiple fluid ad slots for native ads
+      const nativeAdSlot1 = googletag
+        .defineSlot("/6355419/Travel", ["fluid"], "native-ad-1")
+        .addService(googletag.pubads());
+        
+      const nativeAdSlot2 = googletag
+        .defineSlot("/6355419/Travel", ["fluid"], "native-ad-2")
+        .addService(googletag.pubads());
+        
+      const nativeAdSlot3 = googletag
+        .defineSlot("/6355419/Travel", ["fluid"], "native-ad-3")
+        .addService(googletag.pubads());
+
+      // Define an anchor ad slot that sticks to the bottom of the viewport
+      const anchorSlot = googletag.defineOutOfPageSlot(
+        "/6355419/Travel",
+        googletag.enums.OutOfPageFormat.BOTTOM_ANCHOR
+      );
+
+      if (anchorSlot) {
+        anchorSlot.setTargeting("test", "anchor").addService(googletag.pubads());
+        document.getElementById("status").textContent =
+          "Anchor ad is initialized. Scroll page to activate.";
+      }
+
+      // Configure page-level targeting.
+      googletag.pubads().setTargeting("interests", "basketball");
+
+      // Enable SRA, services, and collapse empty divs.
+      googletag.pubads().enableSingleRequest();
+      googletag.pubads().collapseEmptyDivs(true); // Collapse empty ad slots
+      googletag.enableServices();
+
+      // Set up in-view refresh for native ads every 30 seconds
+      const observerConfig = { threshold: 1.0 }; // Trigger when 100% of the ad is in view
+
+      const nativeSlots = [
+        { id: "native-ad-1", slot: nativeAdSlot1 },
+        { id: "native-ad-2", slot: nativeAdSlot2 },
+        { id: "native-ad-3", slot: nativeAdSlot3 }
+      ];
+
+      nativeSlots.forEach(({ id, slot }) => {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              // Set a 30-second interval to refresh the ad slot
+              setInterval(() => {
+                googletag.pubads().refresh([slot]);
+              }, 60000);
+            }
+          });
+        }, observerConfig);
+
+        observer.observe(document.getElementById(id));
+      });
+    });
+  </script>
+</head>
+<body>
+  <div class="page-content centered">
+    <!-- Banner Ad -->
+    <div id="banner-ad" class="ad-slot"></div>
+    
+    <!-- Responsive Image below the banner ad -->
+    <img src="screenshot.png" alt="Ad Call Screenshot" class="responsive-img">
+    
+    <!-- Status message for anchor ad -->
+    <h1 id="status">Anchor ads are not supported on this page.</h1>
+    <!-- Spacer for positioning the native ad container -->
+    <div class="spacer"></div>
+    <!-- Native Ad Slots with 300x250 size -->
+    <div id="native-ad-1" class="native-slot"></div>
+    <div>native-ad-1</div>
+    <div id="native-ad-2" class="native-slot"></div>
+    <div>native-ad-2</div>
+    <div id="native-ad-3" class="native-slot"></div>
+    <div>native-ad-3</div>
+  </div>
+
+  <script>
+    googletag.cmd.push(() => {
+      // Request and render all previously defined ad slots
+      googletag.display("banner-ad");
+      googletag.display("native-ad-1");
+      googletag.display("native-ad-2");
+      googletag.display("native-ad-3");
+    });
+  </script>
+
+  <p>Scroll down to see the anchor ad at the bottom of the page.</p>
+  <p>Content here...</p>
+  <p>More content...</p>
+</body>
+</html>
